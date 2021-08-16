@@ -31,6 +31,12 @@ class GameScene: SKScene {
     let kInvaderColCount = 6
     
     
+    let kShipSize = CGSize(width: 30, height: 16)
+    let kShipName = "ship"
+    
+    let kScoreHudName = "scoreHud"
+    let kHealthHudName = "healthHud"
+    
     override func didMove(to view: SKView) {
         
 //        if !self.contentCreated {
@@ -39,6 +45,8 @@ class GameScene: SKScene {
 //        }
         
         setupInvaders()
+        setupShip()
+        setupHud()
        
         
     }
@@ -147,5 +155,50 @@ class GameScene: SKScene {
       }
     }
     
+    func setupShip() {
+      // 1
+      let ship = makeShip()
+      
+      // 2
+      ship.position = CGPoint(x: -25, y: -250)
+      addChild(ship)
+    }
+
+    func makeShip() -> SKNode {
+      let ship = SKSpriteNode(color: SKColor.green, size: kShipSize)
+      ship.name = kShipName
+      return ship
+    }
+    
+    func setupHud() {
+      // 1
+      let scoreLabel = SKLabelNode(fontNamed: "Courier")
+      scoreLabel.name = kScoreHudName
+      scoreLabel.fontSize = 25
+      
+      // 2
+      scoreLabel.fontColor = SKColor.green
+      scoreLabel.text = String(format: "Score: %04u", 0)
+      
+      // 3
+        //check the other tutorials to see how those labels were added and positioned.
+        scoreLabel.position = CGPoint(x:20, y: 250)
+      addChild(scoreLabel)
+      
+      // 4
+      let healthLabel = SKLabelNode(fontNamed: "Courier")
+      healthLabel.name = kHealthHudName
+      healthLabel.fontSize = 25
+      
+      // 5
+      healthLabel.fontColor = SKColor.red
+      healthLabel.text = String(format: "Health: %.1f%%", 100.0)
+      
+      // 6
+        //check the other tutorials to see how those labels were added and positioned.
+      healthLabel.position = CGPoint(x:20, y: 225)
+      
+      addChild(healthLabel)
+    }
     
 }
