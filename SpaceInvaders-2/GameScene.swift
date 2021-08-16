@@ -99,6 +99,7 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        moveInvaders(forUpdate: currentTime)
     }
     
     
@@ -113,6 +114,30 @@ class GameScene: SKScene {
 //      // black space color
 //      self.backgroundColor = SKColor.black
 //    }
+    func moveInvaders(forUpdate currentTime: CFTimeInterval) {
+      // 1
+      if currentTime - timeOfLastMove < timePerMove {
+        return
+      }
+      
+      // 2
+        enumerateChildNodes(withName: InvaderType.name) { node, stop in
+        switch self.invaderMovementDirection {
+        case .right:
+          node.position = CGPoint(x: node.position.x + 10, y: node.position.y)
+        case .left:
+          node.position = CGPoint(x: node.position.x - 10, y: node.position.y)
+        case .downThenLeft, .downThenRight:
+          node.position = CGPoint(x: node.position.x, y: node.position.y - 10)
+        case .none:
+          break
+        }
+        
+        // 3
+        self.timeOfLastMove = currentTime
+      }
+    }
+    
     
     func makeInvader(ofType invaderType: InvaderType) -> SKNode {
       // 1 This code needs to be changed so that each invader can be controlled seperatly, or at least so that each row of invaders can be controlled independatly of the group.
