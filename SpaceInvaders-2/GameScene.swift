@@ -12,6 +12,22 @@ class GameScene: SKScene {
     
     var contentCreated = false
     
+    // 1
+    var invaderMovementDirection: InvaderMovementDirection = .right
+    // 2
+    var timeOfLastMove: CFTimeInterval = 0.0
+    // 3
+    let timePerMove: CFTimeInterval = 1.0
+    
+    
+    enum InvaderMovementDirection {
+      case right
+      case left
+      case downThenRight
+      case downThenLeft
+      case none
+    }
+    
     enum InvaderType {
       case a
       case b
