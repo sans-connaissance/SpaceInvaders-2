@@ -98,7 +98,8 @@ class GameScene: SKScene {
     
     
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+    
+        // this is where you can make things move
         moveInvaders(forUpdate: currentTime)
     }
     
@@ -114,6 +115,11 @@ class GameScene: SKScene {
 //      // black space color
 //      self.backgroundColor = SKColor.black
 //    }
+    
+    // how many different types of moving options can I create?
+    // can I create some kind of engine / or set of functions that call
+    //  each other in order to drive unique movements at a higher order of the code?
+    // what does my movement engine look like?
     func moveInvaders(forUpdate currentTime: CFTimeInterval) {
       // 1
       if currentTime - timeOfLastMove < timePerMove {
@@ -134,7 +140,55 @@ class GameScene: SKScene {
         }
         
         // 3
+
+      }
         self.timeOfLastMove = currentTime
+        self.determineInvaderMovementDirection()
+        
+    }
+    
+    func determineInvaderMovementDirection() {
+      // 1
+      var proposedMovementDirection: InvaderMovementDirection = invaderMovementDirection
+      
+      // 2
+      enumerateChildNodes(withName: InvaderType.name) { node, stop in
+        
+        switch self.invaderMovementDirection {
+        case .right:
+          //3
+          if node.frame.maxX >= node.scene!.size.width - 1.0 {
+            proposedMovementDirection = .downThenLeft
+            
+            stop.pointee = true
+          }
+        case .left:
+          //4
+          if node.frame.minX <= 1.0 {
+            proposedMovementDirection = .downThenRight
+            
+            stop.pointee = true
+          }
+          
+        case .downThenLeft:
+          proposedMovementDirection = .left
+          
+          stop.pointee = true
+          
+        case .downThenRight:
+          proposedMovementDirection = .right
+          
+          stop.pointee = true
+          
+        default:
+          break
+        }
+        
+      }
+      
+      //7
+      if proposedMovementDirection != invaderMovementDirection {
+        invaderMovementDirection = proposedMovementDirection
       }
     }
     
