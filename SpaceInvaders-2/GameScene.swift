@@ -63,10 +63,10 @@ class GameScene: SKScene {
         // add accelerometer monitor to scene.
         motionManager.startAccelerometerUpdates()
         
-        //        if !self.contentCreated {
-        //          self.createContent()
-        //          self.contentCreated = true
-        //        }
+                if !self.contentCreated {
+                  self.createContent()
+                  self.contentCreated = true
+                }
         
         setupInvaders()
         setupShip()
@@ -112,17 +112,18 @@ class GameScene: SKScene {
     }
     
     
-    //    func createContent() {
-    //
-    //      let invader = SKSpriteNode(imageNamed: "InvaderA_00.png")
-    //
-    //      invader.position = CGPoint(x: 0, y: 0)
-    //
-    //      self.addChild(invader)
-    //
-    //      // black space color
-    //      self.backgroundColor = SKColor.black
-    //    }
+        func createContent() {
+    
+//          let invader = SKSpriteNode(imageNamed: "InvaderA_00.png")
+//
+//          invader.position = CGPoint(x: 0, y: 0)
+//
+//          self.addChild(invader)
+    
+          // black space color
+            physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+          self.backgroundColor = SKColor.black
+        }
     
     // how many different types of moving options can I create?
     // can I create some kind of engine / or set of functions that call
@@ -164,6 +165,7 @@ class GameScene: SKScene {
           if fabs(data.acceleration.x) > 0.2 {
             // 4 How do you move the ship?
             print("Acceleration: \(data.acceleration.x)")
+            ship.physicsBody!.applyForce(CGVector(dx: 40 * CGFloat(data.acceleration.x), dy: 0))
           }
         }
       }
@@ -284,6 +286,20 @@ class GameScene: SKScene {
     func makeShip() -> SKNode {
         let ship = SKSpriteNode(color: SKColor.green, size: kShipSize)
         ship.name = kShipName
+        
+        
+        // 1
+        ship.physicsBody = SKPhysicsBody(rectangleOf: ship.frame.size)
+
+        // 2
+        ship.physicsBody!.isDynamic = true
+
+        // 3
+        ship.physicsBody!.affectedByGravity = false
+
+        // 4
+        ship.physicsBody!.mass = 0.02
+        
         return ship
     }
     
