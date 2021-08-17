@@ -157,14 +157,14 @@ class GameScene: SKScene {
         switch self.invaderMovementDirection {
         case .right:
           //3
-          if node.frame.maxX >= node.scene!.size.width - 1.0 {
+          if node.frame.maxX >= 200 {
             proposedMovementDirection = .downThenLeft
             
             stop.pointee = true
           }
         case .left:
           //4
-          if node.frame.minX <= 1.0 {
+          if node.frame.minX <= -200 {
             proposedMovementDirection = .downThenRight
             
             stop.pointee = true
