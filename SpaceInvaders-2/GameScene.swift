@@ -20,6 +20,12 @@ class GameScene: SKScene {
     let kInvaderFiredBulletName = "invaderFiredBullet"
     let kBulletSize = CGSize(width:4, height: 8)
     
+    let kInvaderCategory: UInt32 = 0x1 << 0
+    let kShipFiredBulletCategory: UInt32 = 0x1 << 1
+    let kShipCategory: UInt32 = 0x1 << 2
+    let kSceneEdgeCategory: UInt32 = 0x1 << 3
+    let kInvaderFiredBulletCategory: UInt32 = 0x1 << 4
+    
     
     let motionManager = CMMotionManager()
     
@@ -144,6 +150,10 @@ class GameScene: SKScene {
     
           // black space color
             physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+            
+            //collision detection
+            physicsBody!.categoryBitMask = kSceneEdgeCategory
+            
           self.backgroundColor = SKColor.black
         }
     
@@ -256,6 +266,13 @@ class GameScene: SKScene {
         let invader = SKSpriteNode(color: invaderColor, size: InvaderType.size)
         invader.name = InvaderType.name
         
+        //Collision Detection
+        invader.physicsBody = SKPhysicsBody(rectangleOf: invader.frame.size)
+        invader.physicsBody!.isDynamic = false
+        invader.physicsBody!.categoryBitMask = kInvaderCategory
+        invader.physicsBody!.contactTestBitMask = 0x0
+        invader.physicsBody!.collisionBitMask = 0x0
+        
         return invader
     }
     
@@ -322,6 +339,14 @@ class GameScene: SKScene {
         // 4
         ship.physicsBody!.mass = 0.02
         
+        // contact detection
+        // 1
+        ship.physicsBody!.categoryBitMask = kShipCategory
+        // 2
+        ship.physicsBody!.contactTestBitMask = 0x0
+        // 3
+        ship.physicsBody!.collisionBitMask = kSceneEdgeCategory
+        
         return ship
     }
     
@@ -363,9 +388,26 @@ class GameScene: SKScene {
       case .shipFired:
         bullet = SKSpriteNode(color: SKColor.green, size: kBulletSize)
         bullet.name = kShipFiredBulletName
+        
+        //Collesion detection
+        bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
+        bullet.physicsBody!.isDynamic = true
+        bullet.physicsBody!.affectedByGravity = false
+        bullet.physicsBody!.categoryBitMask = kShipFiredBulletCategory
+        bullet.physicsBody!.contactTestBitMask = kInvaderCategory
+        bullet.physicsBody!.collisionBitMask = 0x0
+        
       case .invaderFired:
         bullet = SKSpriteNode(color: SKColor.magenta, size: kBulletSize)
         bullet.name = kInvaderFiredBulletName
+        
+        //Collision detection
+        bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
+        bullet.physicsBody!.isDynamic = true
+        bullet.physicsBody!.affectedByGravity = false
+        bullet.physicsBody!.categoryBitMask = kInvaderFiredBulletCategory
+        bullet.physicsBody!.contactTestBitMask = kShipCategory
+        bullet.physicsBody!.collisionBitMask = 0x0
         break
       }
       
@@ -457,7 +499,7 @@ class GameScene: SKScene {
           )
           
           // 5
-          let bulletDestination = CGPoint(x: invader.position.x, y: -(bullet.frame.size.height / 2))
+          let bulletDestination = CGPoint(x: invader.position.x, y: -300)
           
           // 6
           fireBullet(
