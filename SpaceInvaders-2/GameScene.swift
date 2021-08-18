@@ -130,6 +130,7 @@ class GameScene: SKScene {
         processUserMotion(forUpdate: currentTime)
         // this is where you can make things move
         moveInvaders(forUpdate: currentTime)
+        fireInvaderBullets(forUpdate: currentTime)
     }
     
     
@@ -416,7 +417,8 @@ class GameScene: SKScene {
         }
       }
     }
-    
+    // can this be changed so that it's a boolean and any time the user taps it turns to true and a bullet is fired.
+    // also check in the other book to see how HackingWithSwift manages firing bullets.
     func processUserTaps(forUpdate currentTime: CFTimeInterval) {
       // 1
       for tapCount in tapQueue {
@@ -426,6 +428,45 @@ class GameScene: SKScene {
         }
         // 3
         tapQueue.remove(at: 0)
+      }
+    }
+    
+    func fireInvaderBullets(forUpdate currentTime: CFTimeInterval) {
+      let existingBullet = childNode(withName: kInvaderFiredBulletName)
+      
+      // 1
+      if existingBullet == nil {
+        var allInvaders = [SKNode]()
+        
+        // 2
+        enumerateChildNodes(withName: InvaderType.name) { node, stop in
+          allInvaders.append(node)
+        }
+        
+        if allInvaders.count > 0 {
+          // 3
+          let allInvadersIndex = Int(arc4random_uniform(UInt32(allInvaders.count)))
+          
+          let invader = allInvaders[allInvadersIndex]
+          
+          // 4
+          let bullet = makeBullet(of: .invaderFired)
+          bullet.position = CGPoint(
+            x: invader.position.x,
+            y: invader.position.y - invader.frame.size.height / 2 + bullet.frame.size.height / 2
+          )
+          
+          // 5
+          let bulletDestination = CGPoint(x: invader.position.x, y: -(bullet.frame.size.height / 2))
+          
+          // 6
+          fireBullet(
+            bullet: bullet,
+            toDestination: bulletDestination,
+            withDuration: 2.0,
+            andSoundFileName: "InvaderBullet.wav"
+          )
+        }
       }
     }
 }
