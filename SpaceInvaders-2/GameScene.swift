@@ -9,10 +9,14 @@ import SpriteKit
 import GameplayKit
 import CoreMotion
 
-class GameScene: SKScene {
+//collision detection
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     var contentCreated = false
+    
+    // im not sure this is necessary
+    var contactQueue = [SKPhysicsContact]()
     
     var tapQueue = [Int]()
     
@@ -90,6 +94,9 @@ class GameScene: SKScene {
         setupShip()
         setupHud()
         
+        //collision detection
+        physicsWorld.contactDelegate = self
+        
         
     }
     
@@ -120,8 +127,54 @@ class GameScene: SKScene {
             tapQueue.append(1)
           }
         }
+    }
+    
+    //collision detection
+    func didBegin(_ contact: SKPhysicsContact) {
+      contactQueue.append(contact)
+    }
+    
+    //collision detection
+    //This is interesting!
+    func handle(_ contact: SKPhysicsContact) {
+      //1
+      // Ensure you haven't already handled this contact and removed its nodes
+      if contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil {
+        return
+      }
+      
+      let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
+      
+      // 2
+      if nodeNames.contains(kShipName) && nodeNames.contains(kInvaderFiredBulletName) {
+        
+        // 3
+        // Invader bullet hit a ship
+        run(SKAction.playSoundFileNamed("ShipHit.wav", waitForCompletion: false))
+        
+        contact.bodyA.node!.removeFromParent()
+        contact.bodyB.node!.removeFromParent()
         
         
+      } else if nodeNames.contains(InvaderType.name) && nodeNames.contains(kShipFiredBulletName) {
+        
+        // 4
+        // Ship bullet hit an invader
+        run(SKAction.playSoundFileNamed("InvaderHit.wav", waitForCompletion: false))
+        contact.bodyA.node!.removeFromParent()
+        contact.bodyB.node!.removeFromParent()
+      }
+    }
+    
+    // collision detection
+    func processContacts(forUpdate currentTime: CFTimeInterval) {
+      for contact in contactQueue {
+        handle(contact)
+        
+        if let index = contactQueue.firstIndex(of: contact) {
+          contactQueue.remove(at: index)
+        }
+      }
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
