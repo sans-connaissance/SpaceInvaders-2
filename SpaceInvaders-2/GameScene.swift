@@ -319,31 +319,42 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     
+    func loadInvaderTextures(ofType invaderType: InvaderType) -> [SKTexture] {
+      
+      var prefix: String
+      
+      switch(invaderType) {
+      case .a:
+        prefix = "InvaderA"
+      case .b:
+        prefix = "InvaderB"
+      case .c:
+        prefix = "InvaderC"
+      }
+      
+      // 1
+      return [SKTexture(imageNamed: String(format: "%@_00.png", prefix)),
+              SKTexture(imageNamed: String(format: "%@_01.png", prefix))]
+    }
+
     func makeInvader(ofType invaderType: InvaderType) -> SKNode {
-        // 1 This code needs to be changed so that each invader can be controlled seperatly, or at least so that each row of invaders can be controlled independatly of the group.
-        var invaderColor: SKColor
-        
-        switch(invaderType) {
-        case .a:
-            invaderColor = SKColor.red
-        case .b:
-            invaderColor = SKColor.green
-        case .c:
-            invaderColor = SKColor.blue
-        }
-        
-        // 2
-        let invader = SKSpriteNode(color: invaderColor, size: InvaderType.size)
-        invader.name = InvaderType.name
-        
-        //Collision Detection
-        invader.physicsBody = SKPhysicsBody(rectangleOf: invader.frame.size)
-        invader.physicsBody!.isDynamic = false
-        invader.physicsBody!.categoryBitMask = kInvaderCategory
-        invader.physicsBody!.contactTestBitMask = 0x0
-        invader.physicsBody!.collisionBitMask = 0x0
-        
-        return invader
+      let invaderTextures = loadInvaderTextures(ofType: invaderType)
+      
+      // 2
+      let invader = SKSpriteNode(texture: invaderTextures[0])
+      invader.name = InvaderType.name
+      
+      // 3
+      invader.run(SKAction.repeatForever(SKAction.animate(with: invaderTextures, timePerFrame: timePerMove)))
+      
+      // invaders' bitmasks setup
+      invader.physicsBody = SKPhysicsBody(rectangleOf: invader.frame.size)
+      invader.physicsBody!.isDynamic = false
+      invader.physicsBody!.categoryBitMask = kInvaderCategory
+      invader.physicsBody!.contactTestBitMask = 0x0
+      invader.physicsBody!.collisionBitMask = 0x0
+      
+      return invader
     }
     
     func setupInvaders() {
@@ -393,7 +404,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func makeShip() -> SKNode {
-        let ship = SKSpriteNode(color: SKColor.green, size: kShipSize)
+        let ship = SKSpriteNode(imageNamed: "Ship.png")
         ship.name = kShipName
         
         
