@@ -12,6 +12,8 @@ import CoreMotion
 //collision detection
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
+    var score: Int = 0
+    var shipHealth: Float = 1.0
     
     var contentCreated = false
     
@@ -137,7 +139,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     //collision detection
     //This is interesting!
     func handle(_ contact: SKPhysicsContact) {
-      //1
       // Ensure you haven't already handled this contact and removed its nodes
       if contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil {
         return
@@ -145,24 +146,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       
       let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
       
-      // 2
       if nodeNames.contains(kShipName) && nodeNames.contains(kInvaderFiredBulletName) {
-        
-        // 3
         // Invader bullet hit a ship
         run(SKAction.playSoundFileNamed("ShipHit.wav", waitForCompletion: false))
         
-        contact.bodyA.node!.removeFromParent()
-        contact.bodyB.node!.removeFromParent()
+        // 1
+        adjustShipHealth(by: -0.334)
         
+        if shipHealth <= 0.0 {
+          // 2
+          contact.bodyA.node!.removeFromParent()
+          contact.bodyB.node!.removeFromParent()
+        } else {
+          // 3
+          if let ship = childNode(withName: kShipName) {
+            ship.alpha = CGFloat(shipHealth)
+            
+            if contact.bodyA.node == ship {
+              contact.bodyB.node!.removeFromParent()
+              
+            } else {
+              contact.bodyA.node!.removeFromParent()
+            }
+          }
+        }
         
       } else if nodeNames.contains(InvaderType.name) && nodeNames.contains(kShipFiredBulletName) {
-        
-        // 4
         // Ship bullet hit an invader
         run(SKAction.playSoundFileNamed("InvaderHit.wav", waitForCompletion: false))
         contact.bodyA.node!.removeFromParent()
         contact.bodyB.node!.removeFromParent()
+        
+        // 4
+        adjustScore(by: 100)
       }
     }
     
@@ -184,6 +200,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: TimeInterval) {
         
+        processContacts(forUpdate: currentTime)
         processUserTaps(forUpdate: currentTime)
         
         processUserMotion(forUpdate: currentTime)
@@ -425,13 +442,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // 5
         healthLabel.fontColor = SKColor.red
-        healthLabel.text = String(format: "Health: %.1f%%", 100.0)
+        healthLabel.text = String(format: "Health: %.1f%%", shipHealth * 100.0)
+        
         
         // 6
         //check the other tutorials to see how those labels were added and positioned.
         healthLabel.position = CGPoint(x:20, y: 225)
         
         addChild(healthLabel)
+    }
+    
+    func adjustScore(by points: Int) {
+      score += points
+      
+      if let score = childNode(withName: kScoreHudName) as? SKLabelNode {
+        score.text = String(format: "Score: %04u", self.score)
+      }
+    }
+
+    func adjustShipHealth(by healthAdjustment: Float) {
+      // 1
+      shipHealth = max(shipHealth + healthAdjustment, 0)
+      
+      if let health = childNode(withName: kHealthHudName) as? SKLabelNode {
+        health.text = String(format: "Health: %.1f%%", self.shipHealth * 100)
+      }
     }
     
     func makeBullet(of bulletType: BulletType) -> SKNode {
