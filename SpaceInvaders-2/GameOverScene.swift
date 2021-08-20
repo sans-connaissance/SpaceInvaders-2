@@ -79,10 +79,14 @@ class GameOverScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)  {
         
-        let gameScene = GameScene(size: self.size)
-        gameScene.scaleMode = .aspectFill
+        if let scene = GameScene(fileNamed: "GameScene") {
+            // make it stretch to fill all available space
+            scene.scaleMode = .aspectFill
+            
+            // present it immediately
+            //self.view?.presentScene(scene)
         
-        self.view?.presentScene(gameScene, transition: SKTransition.doorsCloseHorizontal(withDuration: 1.0))
-        
+        self.view?.presentScene(scene, transition: SKTransition.doorsCloseHorizontal(withDuration: 1.0))
+        }
     }
 }
