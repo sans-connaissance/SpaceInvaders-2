@@ -44,7 +44,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // 2
     var timeOfLastMove: CFTimeInterval = 0.0
     // 3
-    let timePerMove: CFTimeInterval = 1.0
+    var timePerMove: CFTimeInterval = 1.0
     
     
     enum InvaderMovementDirection {
@@ -304,6 +304,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
+    func adjustInvaderMovement(to timePerMove: CFTimeInterval) {
+      // 1
+      if self.timePerMove <= 0 {
+        return
+      }
+      
+      // 2
+      let ratio: CGFloat = CGFloat(self.timePerMove / timePerMove)
+      self.timePerMove = timePerMove
+      
+      // 3
+      enumerateChildNodes(withName: InvaderType.name) { node, stop in
+        node.speed = node.speed * ratio
+      }
+    }
+    
+    
     func processUserMotion(forUpdate currentTime: CFTimeInterval) {
       // 1
       if let ship = childNode(withName: kShipName) as? SKSpriteNode {
@@ -332,12 +349,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 if node.frame.maxX >= 200 {
                     proposedMovementDirection = .downThenLeft
                     
+                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
+                    
                     stop.pointee = true
                 }
             case .left:
                 //4
                 if node.frame.minX <= -200 {
                     proposedMovementDirection = .downThenRight
+                    
+                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
                     
                     stop.pointee = true
                 }
