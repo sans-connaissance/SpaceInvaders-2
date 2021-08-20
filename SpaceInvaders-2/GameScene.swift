@@ -15,6 +15,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var score: Int = 0
     var shipHealth: Float = 1.0
     
+    //the bottom height variable is cool. i think this can be used to do a lot of interesting things in my game.
+    let kMinInvaderBottomHeight: Float = -240.0
+    var gameEnding: Bool = false
+    
     var contentCreated = false
     
     // im not sure this is necessary
@@ -182,6 +186,44 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       }
     }
     
+    func isGameOver() -> Bool {
+      // 1
+      let invader = childNode(withName: InvaderType.name)
+      
+      // 2
+      var invaderTooLow = false
+      
+      enumerateChildNodes(withName: InvaderType.name) { node, stop in
+        
+        if (Float(node.frame.minY) <= self.kMinInvaderBottomHeight)   {
+          invaderTooLow = true
+          stop.pointee = true
+        }
+      }
+      
+      // 3
+      let ship = childNode(withName: kShipName)
+      
+      // 4
+      return invader == nil || invaderTooLow || ship == nil
+    }
+
+    func endGame() {
+      // 1
+      if !gameEnding {
+        
+        gameEnding = true
+        
+        // 2
+        motionManager.stopAccelerometerUpdates()
+        
+        // 3
+        let gameOverScene: GameOverScene = GameOverScene(size: size)
+        
+        view?.presentScene(gameOverScene, transition: SKTransition.doorsOpenHorizontal(withDuration: 1.0))
+      }
+    }
+    
     // collision detection
     func processContacts(forUpdate currentTime: CFTimeInterval) {
       for contact in contactQueue {
@@ -199,6 +241,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     override func update(_ currentTime: TimeInterval) {
+        
+        if isGameOver() {
+          endGame()
+        }
         
         processContacts(forUpdate: currentTime)
         processUserTaps(forUpdate: currentTime)
